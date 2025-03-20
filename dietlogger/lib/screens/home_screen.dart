@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../widgets/footer.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -26,12 +27,9 @@ class HomeScreen extends StatelessWidget {
               child: PieChart(
                 PieChartData(
                   sections: [
-                    PieChartSectionData(
-                      value: 50, title: 'Protein', color: Colors.blue, radius: 60),
-                    PieChartSectionData(
-                      value: 30, title: 'Fat', color: Colors.orange, radius: 50),
-                    PieChartSectionData(
-                      value: 20, title: 'Carbs', color: Colors.green, radius: 40),
+                    PieChartSectionData(value: 50, title: 'Protein', color: Colors.blue, radius: 60),
+                    PieChartSectionData(value: 30, title: 'Fat', color: Colors.orange, radius: 50),
+                    PieChartSectionData(value: 20, title: 'Carbs', color: Colors.green, radius: 40),
                   ],
                 ),
               ),
@@ -47,20 +45,10 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-
-            // ショートカットボタン
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildShortcutButton(context, Icons.chat, '提案', '/inquiry'),
-                _buildShortcutButton(context, Icons.restaurant, '食事ログ', '/meal_log'),
-                _buildShortcutButton(context, Icons.fitness_center, 'トレログ', '/training_log'),
-                _buildShortcutButton(context, Icons.person, 'プロフィール', '/profile'),
-              ],
-            ),
           ],
         ),
       ),
+      bottomNavigationBar: const Footer(),  // フッターを追加
     );
   }
 
@@ -75,19 +63,6 @@ class HomeScreen extends StatelessWidget {
             Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildShortcutButton(BuildContext context, IconData icon, String label, String route) {
-    return ElevatedButton.icon(
-      onPressed: () => Navigator.pushNamed(context, route),
-      icon: Icon(icon, size: 24),
-      label: Text(label),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.green,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       ),
     );
   }
