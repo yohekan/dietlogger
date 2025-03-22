@@ -30,9 +30,19 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:  # ← 追加（Flutter SDKに含まれている）
+    sdk: flutter
+
   fl_chart: ^0.63.0
   flutter_chat_bubble: ^2.0.0
   table_calendar: ^3.0.8
+  drift: ^2.7.0
+  sqlite3_flutter_libs: ^0.5.0
+  path_provider: ^2.0.0
+  path: ^1.8.2
+  sqflite: ^2.0.0+4
+  http: ^1.2.0
+  intl: ^0.19.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -41,6 +51,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  drift_dev: ^2.7.0
+  build_runner: ^2.3.3
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
