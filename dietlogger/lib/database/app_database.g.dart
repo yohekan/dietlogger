@@ -20,17 +20,15 @@ class $MealsTable extends Meals with TableInfo<$MealsTable, Meal> {
   static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<int> userId = GeneratedColumn<int>(
-      'user_id', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: true,
-      $customConstraints: 'REFERENCES users(id)');
+      'user_id', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
   static const VerificationMeta _mealTypeMeta =
       const VerificationMeta('mealType');
   @override
   late final GeneratedColumn<String> mealType = GeneratedColumn<String>(
       'meal_type', aliasedName, false,
       additionalChecks:
-          GeneratedColumn.checkTextLength(minTextLength: 3, maxTextLength: 10),
+          GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 10),
       type: DriftSqlType.string,
       requiredDuringInsert: true);
   static const VerificationMeta _dateMeta = const VerificationMeta('date');
@@ -132,8 +130,6 @@ class $MealsTable extends Meals with TableInfo<$MealsTable, Meal> {
     if (data.containsKey('user_id')) {
       context.handle(_userIdMeta,
           userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
-    } else if (isInserting) {
-      context.missing(_userIdMeta);
     }
     if (data.containsKey('meal_type')) {
       context.handle(_mealTypeMeta,
@@ -211,7 +207,7 @@ class $MealsTable extends Meals with TableInfo<$MealsTable, Meal> {
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       userId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}user_id'])!,
+          .read(DriftSqlType.int, data['${effectivePrefix}user_id']),
       mealType: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}meal_type'])!,
       date: attachedDatabase.typeMapping
@@ -247,7 +243,7 @@ class $MealsTable extends Meals with TableInfo<$MealsTable, Meal> {
 
 class Meal extends DataClass implements Insertable<Meal> {
   final int id;
-  final int userId;
+  final int? userId;
   final String mealType;
   final DateTime date;
   final String foodName;
@@ -262,7 +258,7 @@ class Meal extends DataClass implements Insertable<Meal> {
   final DateTime createdAt;
   const Meal(
       {required this.id,
-      required this.userId,
+      this.userId,
       required this.mealType,
       required this.date,
       required this.foodName,
@@ -279,7 +275,9 @@ class Meal extends DataClass implements Insertable<Meal> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['user_id'] = Variable<int>(userId);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<int>(userId);
+    }
     map['meal_type'] = Variable<String>(mealType);
     map['date'] = Variable<DateTime>(date);
     map['food_name'] = Variable<String>(foodName);
@@ -304,7 +302,8 @@ class Meal extends DataClass implements Insertable<Meal> {
   MealsCompanion toCompanion(bool nullToAbsent) {
     return MealsCompanion(
       id: Value(id),
-      userId: Value(userId),
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
       mealType: Value(mealType),
       date: Value(date),
       foodName: Value(foodName),
@@ -329,7 +328,7 @@ class Meal extends DataClass implements Insertable<Meal> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Meal(
       id: serializer.fromJson<int>(json['id']),
-      userId: serializer.fromJson<int>(json['userId']),
+      userId: serializer.fromJson<int?>(json['userId']),
       mealType: serializer.fromJson<String>(json['mealType']),
       date: serializer.fromJson<DateTime>(json['date']),
       foodName: serializer.fromJson<String>(json['foodName']),
@@ -349,7 +348,7 @@ class Meal extends DataClass implements Insertable<Meal> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'userId': serializer.toJson<int>(userId),
+      'userId': serializer.toJson<int?>(userId),
       'mealType': serializer.toJson<String>(mealType),
       'date': serializer.toJson<DateTime>(date),
       'foodName': serializer.toJson<String>(foodName),
@@ -367,7 +366,7 @@ class Meal extends DataClass implements Insertable<Meal> {
 
   Meal copyWith(
           {int? id,
-          int? userId,
+          Value<int?> userId = const Value.absent(),
           String? mealType,
           DateTime? date,
           String? foodName,
@@ -382,7 +381,7 @@ class Meal extends DataClass implements Insertable<Meal> {
           DateTime? createdAt}) =>
       Meal(
         id: id ?? this.id,
-        userId: userId ?? this.userId,
+        userId: userId.present ? userId.value : this.userId,
         mealType: mealType ?? this.mealType,
         date: date ?? this.date,
         foodName: foodName ?? this.foodName,
@@ -455,7 +454,7 @@ class Meal extends DataClass implements Insertable<Meal> {
 
 class MealsCompanion extends UpdateCompanion<Meal> {
   final Value<int> id;
-  final Value<int> userId;
+  final Value<int?> userId;
   final Value<String> mealType;
   final Value<DateTime> date;
   final Value<String> foodName;
@@ -486,7 +485,7 @@ class MealsCompanion extends UpdateCompanion<Meal> {
   });
   MealsCompanion.insert({
     this.id = const Value.absent(),
-    required int userId,
+    this.userId = const Value.absent(),
     required String mealType,
     required DateTime date,
     required String foodName,
@@ -499,8 +498,7 @@ class MealsCompanion extends UpdateCompanion<Meal> {
     required String barcode,
     this.photoUrl = const Value.absent(),
     this.createdAt = const Value.absent(),
-  })  : userId = Value(userId),
-        mealType = Value(mealType),
+  })  : mealType = Value(mealType),
         date = Value(date),
         foodName = Value(foodName),
         calories = Value(calories),
@@ -544,7 +542,7 @@ class MealsCompanion extends UpdateCompanion<Meal> {
 
   MealsCompanion copyWith(
       {Value<int>? id,
-      Value<int>? userId,
+      Value<int?>? userId,
       Value<String>? mealType,
       Value<DateTime>? date,
       Value<String>? foodName,
@@ -648,6 +646,7 @@ class MealsCompanion extends UpdateCompanion<Meal> {
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   late final $MealsTable meals = $MealsTable(this);
+  late final MealDao mealDao = MealDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
